@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  LazyApiApp:
+    image: ambientum/php:8.0-nginx
+    ports:
+      - '91:8080'
+    volumes:
+      - '.:/var/www/app'
+

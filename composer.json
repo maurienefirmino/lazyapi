@@ -1,0 +1,25 @@
+{
+    "name": "maurienejunior/lazy-api",
+    "description": "A generic api to helper lazy people like me",
+    "authors":[
+        {
+            "name":"Mauriene Junior",
+            "email":"maurienejunior@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "App\\":"app/",
+            "maurienejunior\\lazyapi\\":"packages/maurienejunior/lazyapi/src"
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "maurienejunior\\lazyapi\\LazyApiServiceProvider"
+            ]
+        }
+    }
+}
