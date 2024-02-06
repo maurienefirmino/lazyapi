@@ -7,20 +7,118 @@ use Exception;
 
 class LazyApiService{
 
-    public function findOne($id){
-        try{
-            return LazyApiHttp::ok($this->repository->findOne($id));
-        }catch(Exception $ex){
-            return LazyApiHttp::erro($ex);
+    protected $repository;
+
+    public function __construct($repository){
+        $this->repository = $repository;
+    }
+
+    public function getAllWithFilter(){
+        $data = $this->repository->getModel()::query();
+
+        foreach(request()->query() as $key=>$search){
+            $search = explode("|",$search);
+
+            if(count(explode("|",$key)) == 1){
+
+            switch($search[0]){
+                case '>':
+                case '<':
+                case '=':
+                case '<>':
+                case 'ilike':
+                    $data->where($key,$search[0],$search[1]);
+                break;
+                case 'between':
+                    $data->whereBetween($key,[$search[1],$search[2]]);
+                    break;
+                default:
+                break;
+            }
         }
+
+
+            $fields = explode("|",$key);
+
+            if(count($fields) > 1){
+
+                $relationship = $fields[0];
+                $relationship = $this->repository->getRelationships()[$relationship];
+                $relationship_field = $fields[1];
+                $operator = $search[0];
+                $search1 = $search[1];
+                $search2 = '';
+
+                if(isset($search[2])){
+                    $search2 = $search[2];
+                }
+
+                switch($operator){
+                    case '>':
+                    case '<':
+                    case '=':
+                    case '<>':
+                    case 'ilike':
+                        $data->whereRelation($relationship, $relationship_field, $operator, $search1);
+                    break;
+                    case 'between':
+                        $data->with($relationship)->whereHas($relationship, function($query) use ($relationship_field, $search1, $search2){
+                            return $query->whereBetween($relationship_field,[$search1,$search2]);
+                        });
+                        break;
+                    default:
+                    break;
+                }
+            }
+
+            if($key == 'search'){
+                $fieldsToSearch = $this->repository->getFieldsToSearch();
+                    $search = $search[0];
+                    $data->where(function($query) use ($fieldsToSearch, $search){
+                        foreach($fieldsToSearch as $field){
+
+                            if((int)$field['size'] < strlen($search)) continue;
+
+                            if(is_numeric($search)){
+                                $query->orWhere($field['field'], '=', $search);
+                            }else{
+                                $query->orWhere($field['field'], 'ilike', '%'.$search.'%');
+                            }
+
+                        }
+                    });
+            }
+
+        }
+
+        if($this->repository->getPaginate()){
+            $registerByPage = 10;
+
+            if (request()->registerByPage) $registerByPage = request()->registerByPage;
+            return $data->paginate($registerByPage);
+        }
+
+        return $data->get();
+    }
+
+    public function findOne(string $id){
+        $data = $this->repository->findOne($id);
+        if($data){
+            return LazyApiHttp::ok($data);
+        }
+
+        return LazyApiHttp::notFound($id);
+
     }
 
     public function getAll(){
-        try{
-            return LazyApiHttp::ok($this->repository->getAll());
-        }catch(Exception $ex){
-            return LazyApiHttp::erro($ex);
+
+        if(request()->query()){
+
+            return LazyApiHttp::ok($this->getAllWithFilter());
         }
+
+        return LazyApiHttp::ok($this->repository->getAll());
     }
 
     public function store($item){
