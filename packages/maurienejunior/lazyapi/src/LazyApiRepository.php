@@ -53,7 +53,7 @@ class LazyApiRepository{
     {
         $primaryKey = $this->primaryKey;
         $findItem = $this->findOne($request[$primaryKey]);
-        $findItem->update($request->all());
+        $findItem->update($request);
 
         return $findItem;
     }
