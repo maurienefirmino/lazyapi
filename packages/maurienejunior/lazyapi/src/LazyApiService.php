@@ -129,7 +129,7 @@ class LazyApiService{
             if($validate){
                 return LazyApiHttp::forbidden(['message'=>$validate]);
             }
-            $obj = $this->repository->create($item);
+            $obj = $this->repository->store($item);
             $this->afterSave($obj, $item);
             DB::commit();
             return LazyApiHttp::ok($obj);
