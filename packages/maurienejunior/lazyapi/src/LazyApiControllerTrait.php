@@ -5,6 +5,10 @@ namespace maurienejunior\lazyapi;
 use Illuminate\Http\Request;
 trait LazyApiControllerTrait{
 
+    public function __construct($service){
+        $this->service = $service;
+    }
+
     public function getAll(){
         return $this->service->getAll();
     }
