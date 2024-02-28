@@ -16,6 +16,10 @@ class LazyApiRepository{
         return $this->model::find($id);
     }
 
+    public function findByPrimaryKeys($arr_primary_keys){
+        return $this->model::whereIn($this->primaryKey, $arr_primary_keys)->get();
+    }
+
     public function getModel(){
         return $this->model;
     }
