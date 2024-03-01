@@ -17,25 +17,41 @@ class LazyApiService{
         $data = $this->repository->getModel()::query();
 
         foreach(request()->query() as $key=>$search){
+
+            $orExpression = explode("||",$key);
+
+            $key = $orExpression[0];
+
             $search = explode("|",$search);
 
             if(count(explode("|",$key)) == 1){
 
-            switch($search[0]){
-                case '>':
-                case '<':
-                case '=':
-                case '<>':
-                case 'ilike':
-                    $data->where($key,$search[0],$search[1]);
-                break;
-                case 'between':
-                    $data->whereBetween($key,[$search[1],$search[2]]);
+                switch($search[0]){
+                    case '>':
+                    case '<':
+                    case '<=':
+                    case '>=':
+                    case '=':
+                    case '<>':
+                    case 'ilike':
+                        if(count($orExpression) > 1){
+                            $data->where(function($query) use ($key, $search, $orExpression){
+                                $query->where($key,$search[0],$search[1]);
+                                foreach($orExpression as $expression){
+                                    $query->orWhere($expression,$search[0],$search[1]);
+                                } 
+                            });
+                        }else{
+                            $data->where($key,$search[0],$search[1]);
+                        }
                     break;
-                default:
-                break;
+                    case 'between':
+                        $data->whereBetween($key,[$search[1],$search[2]]);
+                        break;
+                    default:
+                    break;
+                }
             }
-        }
 
 
             $fields = explode("|",$key);
@@ -43,7 +59,6 @@ class LazyApiService{
             if(count($fields) > 1){
 
                 $relationship = $fields[0];
-                $relationship = $this->repository->getRelationships()[$relationship];
                 $relationship_field = $fields[1];
                 $operator = $search[0];
                 $search1 = $search[1];
@@ -56,10 +71,23 @@ class LazyApiService{
                 switch($operator){
                     case '>':
                     case '<':
+                    case '<=':
+                    case '>=':
                     case '=':
                     case '<>':
                     case 'ilike':
-                        $data->whereRelation($relationship, $relationship_field, $operator, $search1);
+                        if(count($orExpression) > 1){
+                            $data->where(function($query) use ($orExpression, $operator, $search1){
+                                foreach($orExpression as $expression){
+                                    $anotherRelationship = explode("|",$expression);
+                                    $anotherRelationship_field = $anotherRelationship[1];
+                                    $anotherRelationship = $anotherRelationship[0];
+                                    $query->orWhereRelation($anotherRelationship, $anotherRelationship_field, $operator, $search1);
+                                } 
+                            });
+                        }else{
+                            $data->whereRelation($relationship, $relationship_field, $operator, $search1);
+                        }
                     break;
                     case 'between':
                         $data->with($relationship)->whereHas($relationship, function($query) use ($relationship_field, $search1, $search2){
@@ -88,7 +116,6 @@ class LazyApiService{
                         }
                     });
             }
-
         }
 
         if($this->repository->getPaginate()){
