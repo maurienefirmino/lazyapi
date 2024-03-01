@@ -65,4 +65,9 @@ class LazyApiRepository{
     public function delete($id){
         $this->findOne($id)->delete();
     }
+
+    //Override
+    public function modifyData($data){
+        return $data;
+    }
 }
