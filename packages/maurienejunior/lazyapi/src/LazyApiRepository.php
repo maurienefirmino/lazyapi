@@ -24,6 +24,10 @@ class LazyApiRepository{
         return $this->model;
     }
 
+    public function setPaginate($value){
+        $this->paginate = $value;
+    }
+
     public function getPaginate(){
         return $this->paginate;
     }

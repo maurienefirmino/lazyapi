@@ -120,6 +120,10 @@ class LazyApiService{
 
         $data = $this->repository->modifyData($data);
 
+        if(request()->paginate){
+            $this->repository->setPaginate(request()->paginate);
+        }
+
         if($this->repository->getPaginate()){
             $registerByPage = 10;
 
