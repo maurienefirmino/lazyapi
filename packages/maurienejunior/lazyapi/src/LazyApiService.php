@@ -121,7 +121,8 @@ class LazyApiService{
         $data = $this->repository->modifyData($data);
 
         if(request()->paginate){
-            $this->repository->setPaginate(request()->paginate);
+            request()->paginate == "true" ? $paginate = true : $paginate = false;
+            $this->repository->setPaginate($paginate);
         }
 
         if($this->repository->getPaginate()){
