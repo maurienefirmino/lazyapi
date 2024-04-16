@@ -125,8 +125,12 @@ class LazyApiService{
             $this->repository->setPaginate($paginate);
         }
 
-        if(request('orderBy')){
-            $data->orderBy(request('orderBy'));
+        if(request('orderByAsc')){
+            $data->orderBy(request('orderByAsc'),'asc');
+        }
+
+        if(request('orderByDesc')){
+            $data->orderBy(request('orderByDesc'), 'desc');
         }
 
         if($this->repository->getPaginate()){
