@@ -120,6 +120,30 @@ class LazyApiService{
 
         $data = $this->repository->modifyData($data);
 
+        $orderByAsc = request('orderByAsc');
+        $orderByDesc = request('orderByDesc');
+
+        if($orderByAsc){
+            $orderParams = explode("|", $orderByAsc);
+            if(count($orderParams) == 1) $data->orderBy($orderByAsc, 'asc');
+
+            if(count($orderParams) == 2){
+                $data->withAggregate($orderParams[0],$orderParams[1]);
+                $data->orderBy($orderParams[0].'_'.$orderParams[1], 'asc');
+            }
+        }
+
+        if($orderByDesc){
+            $orderParams = explode("|", $orderByDesc);
+            if(count($orderParams) == 1) $data->orderBy($orderByDesc, 'desc');
+
+            if(count($orderParams) == 2){
+                $data->withAggregate($orderParams[0],$orderParams[1]);
+                $data->orderBy($orderParams[0].'_'.$orderParams[1], 'desc');
+            }
+        } 
+
+        
         if(request()->limit){
             $data->limit(request()->limit);
         }
@@ -135,61 +159,8 @@ class LazyApiService{
             $registerByPage = request()->registerByPage;
         }
 
-        $orderByAsc = request('orderByAsc');
-        $orderByDesc = request('orderByDesc');
-
-        if($orderByAsc){
-            $orderParams = explode("|", $orderByAsc);
-            if(count($orderParams) == 1) $data->orderBy($orderByAsc, 'asc');
-
-            if(count($orderParams) == 2){
-                
-                if($this->repository->getPaginate()){
-
-                    // $registers = $data->with($orderParams[0])->pluck('id')->sortBy($orderParams[0].".".$orderParams[1])->take($registerByPage)->toArray();
-
-                    // $collection = $data->get()->sortBy('customer.id','desc')->take($registerByPage); 
-
-                    $registers = $data->with('customer')->pluck('id')->sortByDesc('slin.person.name')->take($registerByPage)->toArray();
-
-                    $data->whereIn('id', $registers)->paginate($registerByPage);
-
-                    return $data->paginate($registerByPage);
-
-                    
-                }
-
-                return $data->get()->sortBy($orderParams[0].".".$orderParams[1]);
-            }
-        }
-
-        if($orderByDesc){
-            $orderParams = explode("|", $orderByDesc);
-            if(count($orderParams) == 1) $data->orderBy($orderByDesc, 'desc');
-
-            if(count($orderParams) == 2){
-                
-                if($this->repository->getPaginate()){
-
-                    $registers = $data->pluck('id')->sortByDesc($orderParams[0].".".$orderParams[1])->take($registerByPage)->toArray();
-
-                    $data->whereIn('id', $registers)->paginate($registerByPage);
-
-                    return $data->paginate($registerByPage);
-                    
-                }
-
-                return $data->get()->sortByDesc($orderParams[0].".".$orderParams[1]);
-            }
-        } 
 
         if($this->repository->getPaginate()){
-            $registerByPage = 10;
-
-            if (request()->registerByPage){
-                $registerByPage = request()->registerByPage;
-            }
-
             return $data->paginate($registerByPage);
         }
         
