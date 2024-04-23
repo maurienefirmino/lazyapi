@@ -120,23 +120,76 @@ class LazyApiService{
 
         $data = $this->repository->modifyData($data);
 
+        if(request()->limit){
+            $data->limit(request()->limit);
+        }
+
         if(request()->paginate){
             request()->paginate == "true" ? $paginate = true : $paginate = false;
             $this->repository->setPaginate($paginate);
         }
 
-        if(request('orderByAsc')){
-            $data->orderBy(request('orderByAsc'),'asc');
+        $registerByPage = 10;
+
+        if (request()->registerByPage){
+            $registerByPage = request()->registerByPage;
         }
 
-        if(request('orderByDesc')){
-            $data->orderBy(request('orderByDesc'), 'desc');
+        $orderByAsc = request('orderByAsc');
+        $orderByDesc = request('orderByDesc');
+
+        if($orderByAsc){
+            $orderParams = explode("|", $orderByAsc);
+            if(count($orderParams) == 1) $data->orderBy($orderByAsc, 'asc');
+
+            if(count($orderParams) == 2){
+                
+                if($this->repository->getPaginate()){
+
+                    // $registers = $data->with($orderParams[0])->pluck('id')->sortBy($orderParams[0].".".$orderParams[1])->take($registerByPage)->toArray();
+
+                    // $collection = $data->get()->sortBy('customer.id','desc')->take($registerByPage); 
+
+                    $registers = $data->with('customer')->pluck('id')->sortByDesc('slin.person.name')->take($registerByPage)->toArray();
+
+                    $data->whereIn('id', $registers)->paginate($registerByPage);
+
+                    return $data->paginate($registerByPage);
+
+                    
+                }
+
+                return $data->get()->sortBy($orderParams[0].".".$orderParams[1]);
+            }
         }
+
+        if($orderByDesc){
+            $orderParams = explode("|", $orderByDesc);
+            if(count($orderParams) == 1) $data->orderBy($orderByDesc, 'desc');
+
+            if(count($orderParams) == 2){
+                
+                if($this->repository->getPaginate()){
+
+                    $registers = $data->pluck('id')->sortByDesc($orderParams[0].".".$orderParams[1])->take($registerByPage)->toArray();
+
+                    $data->whereIn('id', $registers)->paginate($registerByPage);
+
+                    return $data->paginate($registerByPage);
+                    
+                }
+
+                return $data->get()->sortByDesc($orderParams[0].".".$orderParams[1]);
+            }
+        } 
 
         if($this->repository->getPaginate()){
             $registerByPage = 10;
 
-            if (request()->registerByPage) $registerByPage = request()->registerByPage;
+            if (request()->registerByPage){
+                $registerByPage = request()->registerByPage;
+            }
+
             return $data->paginate($registerByPage);
         }
         
@@ -234,6 +287,5 @@ class LazyApiService{
     public function beforeUpdate($item){ return null; }
     //Alguma ação antes de deletar
     public function beforeDelete($id){ return null; }
-
 
 }
