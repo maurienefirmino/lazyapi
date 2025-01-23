@@ -159,6 +159,9 @@ class LazyApiService{
             $registerByPage = request()->registerByPage;
         }
 
+        if(request()->count){
+            return $data->count();
+        }
 
         if($this->repository->getPaginate()){
             return $data->paginate($registerByPage);
