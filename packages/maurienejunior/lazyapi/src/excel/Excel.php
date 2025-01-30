@@ -3,14 +3,15 @@
 namespace maurienejunior\lazyapi\excel;
 
 class Excel{
+    
     public static function array_to_csv_download($data, $fields, $filename = "export.csv", $delimiter=";") {
 
         $f = fopen('php://memory', 'w'); 
 
         $keys_arr = [];
 
-        foreach($fields as $key => $field){
-            array_push($keys_arr, $key);
+        foreach($fields as $field){
+            array_push($keys_arr, $field);
         }
 
         fputcsv($f, $keys_arr, $delimiter); 
@@ -20,7 +21,7 @@ class Excel{
             $arr_itens = [];
 
             foreach ($fields as $key => $field){
-                array_push($arr_itens, $d->$field);
+                array_push($arr_itens, $d->$key);
             }
 
             fputcsv($f, $arr_itens, $delimiter); 
