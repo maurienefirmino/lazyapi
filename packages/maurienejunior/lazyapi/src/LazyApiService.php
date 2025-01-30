@@ -193,7 +193,7 @@ class LazyApiService{
         if(request()->query()){
 
             $data = $this->getAllWithFilter();
-            $fields = $this->repository->getFieldsToExport();
+            // $fields = $this->repository->getFieldsToExport();
 
             // if(request()->generate_excel){
             //     return Excel::array_to_csv_download($data, $fields);
