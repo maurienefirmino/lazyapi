@@ -10,6 +10,8 @@ class LazyApiRepository{
 
     protected $fieldsToSearch = [];
 
+    protected $fieldsToExport = [];
+
     protected $relationships = [];
 
     public function findOne($id){
@@ -30,6 +32,14 @@ class LazyApiRepository{
 
     public function getPaginate(){
         return $this->paginate;
+    }
+
+    public function setFieldsToExport($value){
+        $this->fieldsToExport = $value;
+    }
+    
+    public function getFieldsToExport(){
+        return $this->fieldsToExport;
     }
 
     public function getFieldsToSearch(){

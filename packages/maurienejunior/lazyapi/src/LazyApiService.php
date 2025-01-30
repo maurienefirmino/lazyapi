@@ -4,6 +4,7 @@ namespace maurienejunior\lazyapi;
 
 use DB;
 use Exception;
+use maurienejunior\lazyapi\excel\Excel;
 
 class LazyApiService{
 
@@ -163,6 +164,12 @@ class LazyApiService{
             return $data->count();
         }
 
+        if(request()->select){
+            $select = request()->select;
+            $select = explode(",", $select);
+            $data->select($select);
+        }
+
         if($this->repository->getPaginate()){
             return $data->paginate($registerByPage);
         }
@@ -185,10 +192,31 @@ class LazyApiService{
 
         if(request()->query()){
 
-            return LazyApiHttp::ok($this->getAllWithFilter());
+            $data = $this->getAllWithFilter();
+            $fields = $this->repository->getFieldsToExport();
+
+            // if(request()->generate_excel){
+            //     return Excel::array_to_csv_download($data, $fields);
+            // }
+
+            return LazyApiHttp::ok($data);
         }
 
         return LazyApiHttp::ok($this->repository->getAll());
+    }
+
+    public function generateExcel(){
+
+        $data = $this->repository->getAll();
+        $fields = $this->repository->getFieldsToExport();
+
+        if(request()->query()){
+            $data = $this->getAllWithFilter();     
+        }
+
+        $data = $this->modifyBeforeExport($data);
+
+        return Excel::array_to_csv_download($data, $fields);
     }
 
     public function store($item){
@@ -261,5 +289,7 @@ class LazyApiService{
     public function beforeUpdate($item){ return null; }
     //Alguma ação antes de deletar
     public function beforeDelete($id){ return null; }
+    //Modifiar itens antes de mostrar no excel/pdf
+    public function modifyBeforeExport($data){ return $data; }
 
 }

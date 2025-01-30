@@ -31,4 +31,8 @@ trait LazyApiControllerTrait{
     public function updatePost(Request $data){
         return $this->service->update($data->all());
     }
+
+    public function excel(){
+        return $this->service->generateExcel();
+    }
 }
