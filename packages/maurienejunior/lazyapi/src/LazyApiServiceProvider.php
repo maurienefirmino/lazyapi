@@ -23,6 +23,7 @@ class LazyApiServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $this->loadViewsFrom(__DIR__."/views", "lazy-api-views");
+        $this->loadRoutesFrom(__DIR__."/routes/web.php");
     }
 }
