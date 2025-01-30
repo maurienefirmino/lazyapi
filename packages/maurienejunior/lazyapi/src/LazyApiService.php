@@ -210,6 +210,10 @@ class LazyApiService{
         $data = $this->repository->getAll();
         $fields = $this->repository->getFieldsToExport();
 
+        foreach($fields as $key => $f){
+            $fields[$key] = utf8_decode($f);
+        }
+
         if(request()->query()){
             $data = $this->getAllWithFilter();     
         }
