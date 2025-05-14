@@ -170,6 +170,18 @@ class LazyApiService{
             $data->select($select);
         }
 
+        if(request()->withoutThisRelationships){
+            $withoutThisRelationships = request()->withoutThisRelationships;
+            $withoutThisRelationships = explode(",", $withoutThisRelationships);
+            $data->without($withoutThisRelationships);
+        }
+        
+        if(request()->withThisRelationships){
+            $withThisRelationships = request()->withThisRelationships;
+            $withThisRelationships = explode(",", $withThisRelationships);
+            $data->without($withThisRelationships);
+        }
+
         if($this->repository->getPaginate()){
             return $data->paginate($registerByPage);
         }
