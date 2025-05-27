@@ -49,6 +49,10 @@ class LazyApiService{
                     case 'between':
                         $data->whereBetween($key,[$search[1],$search[2]]);
                         break;
+                    case 'whereIn':
+                        $param = explode(",", $search[1]);
+                        $data->whereIn($key, $param);
+                    break;    
                     default:
                     break;
                 }
@@ -95,6 +99,10 @@ class LazyApiService{
                             return $query->whereBetween($relationship_field,[$search1,$search2]);
                         });
                         break;
+                    case 'whereIn':
+                        $param = explode(",", $search[1]);
+                        $data->whereIn($key, $param);
+                    break;    
                     default:
                     break;
                 }
